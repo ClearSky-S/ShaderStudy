@@ -6,6 +6,7 @@ Shader "Holistic/HelloShader"
         _Emission ("Emission", Color) = (0,0,0,0)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
         _Normal ("Normal", Vector) =  (0, 0, 1)
+        _Environment ("Environment", CUBE) = "black" {}
     }
     SubShader
     {
@@ -20,10 +21,13 @@ Shader "Holistic/HelloShader"
         #pragma target 3.0
 
         sampler2D _MainTex;
+        samplerCUBE _Environment;
 
         struct Input
         {
             float2 uv_MainTex;
+            INTERNAL_DATA // WorldNormalVector, WorldReflectionVector 사용을 위한 필수 데이터
+            float3 worldRefl;
         };
 
         half _Glossiness;
@@ -36,17 +40,16 @@ Shader "Holistic/HelloShader"
         // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
         // #pragma instancing_options assumeuniformscaling
         UNITY_INSTANCING_BUFFER_START(Props)
-            // put more per-instance properties here
+        // put more per-instance properties here
         UNITY_INSTANCING_BUFFER_END(Props)
 
         void surf (Input IN, inout SurfaceOutput o)
         {
-            // Albedo comes from a texture tinted by color
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;
             o.Alpha = c.a;
-            o.Emission = _Emission;
-            o.Normal = _Normal;
+            o.Emission = _Emission.rgb + texCUBE(_Environment, IN.worldRefl).rgb;
+            // o.Normal = _Normal;
         }
         ENDCG
     }
