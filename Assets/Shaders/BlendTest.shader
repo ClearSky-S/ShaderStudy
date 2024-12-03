@@ -11,6 +11,7 @@ Shader "Custom/BlendTest"
             "Queue"="Transparent"
         }
         Blend SrcAlpha OneMinusSrcAlpha
+        Cull Off
         Pass
         {
             SetTexture[_MainTex]
