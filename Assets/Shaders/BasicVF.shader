@@ -9,11 +9,15 @@ Shader "Unlit/BasicVF"
         Tags
         {
             "LightMode" = "ForwardBase"
+//            "Queue" = "Transparent"
         }
         LOD 100
 
+        
+        
         Pass
         {
+            ZWrite On
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -73,6 +77,9 @@ Shader "Unlit/BasicVF"
             }
             ENDCG
         }
+
+        
+
         Pass
         {
             Tags
@@ -110,6 +117,54 @@ Shader "Unlit/BasicVF"
             fixed4 frag(v2f i) : SV_Target
             {
                 SHADOW_CASTER_FRAGMENT(i)
+            }
+            ENDCG
+        }
+
+        Pass
+        {
+// Outline
+            ZWrite Off
+            Cull Front
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            #include "UnityCG.cginc"
+
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                // float2 uv : TEXCOORD0;
+                float3 normal : NORMAL;
+            };
+
+            struct v2f
+            {
+                // float2 uv : TEXCOORD0;
+                float4 pos : SV_POSITION;
+                float3 normal : NORMAL;
+            };
+
+            sampler2D _MainTex;
+            float4 _MainTex_ST;
+
+            v2f vert(appdata v)
+            {
+                v2f o;
+                // v.vertex.xyz += v.normal * 0.1;
+                o.pos = UnityObjectToClipPos(v.vertex);
+                // o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                half3 worldNormal = UnityObjectToWorldNormal(v.normal);
+                float3 offset = TransformViewToProjection(worldNormal);
+                o.pos.xy += offset * 0.01;
+                o.normal = worldNormal;
+                return o;
+            }
+
+            fixed4 frag(v2f i) : SV_Target
+            {
+                return 0;
             }
             ENDCG
         }
