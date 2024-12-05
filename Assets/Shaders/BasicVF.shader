@@ -48,6 +48,7 @@ Shader "Unlit/BasicVF"
             v2f vert(appdata v)
             {
                 v2f o;
+                // v.vertex.xyz += v.normal * (sin(v.vertex.y*20)+1) * 0.2;
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 half3 worldNormal = UnityObjectToWorldNormal(v.normal);
